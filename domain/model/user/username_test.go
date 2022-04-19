@@ -1,7 +1,9 @@
 package user
 
 import (
+	"errors"
 	"fmt"
+	"reflect"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -24,12 +26,9 @@ func Test_NewUserName(t *testing.T) {
 			if diff := cmp.Diff(d.want, got, cmp.AllowUnexported(UserName{})); diff != "" {
 				t.Errorf("mismatch (-want, +got):\n%s", diff)
 			}
-			var errMsg string
-			if err != nil {
-				errMsg = err.Error()
-			}
-			if errMsg != d.errMsg {
-				t.Errorf("Expected error `%s`, got `%s`", d.errMsg, errMsg)
+			var expectedErr *NewUserNameError
+			if err != nil && !errors.As(err, &expectedErr) {
+				t.Errorf("Expected error `%v`, got `%v`", reflect.TypeOf(err), reflect.TypeOf(expectedErr))
 			}
 		})
 	}
