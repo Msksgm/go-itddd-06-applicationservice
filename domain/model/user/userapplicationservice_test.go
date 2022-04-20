@@ -92,3 +92,48 @@ func Test_Get(t *testing.T) {
 		})
 	}
 }
+
+func Test_Update(t *testing.T) {
+	data := []struct {
+		testname          string
+		userUpdateCommand *UserUpdateCommand
+		findByUserId      func(userId UserId) (*User, error)
+		findByUserName    func(name UserName) (*User, error)
+		exists            func(user User) (bool, error)
+		update            func(user User) error
+		want              error
+		errMsg            string
+	}{
+		{
+			"success",
+			&UserUpdateCommand{Id: "userId", Name: "updateUserName"},
+			func(userId UserId) (*User, error) {
+				return &User{name: UserName{value: "userName"}, id: UserId{value: "userId"}}, nil
+			},
+			func(name UserName) (*User, error) { return nil, nil },
+			func(user User) (bool, error) { return false, nil },
+			func(user User) error { return nil },
+			nil,
+			"",
+		},
+	}
+	userApplicationService := UserApplicationService{}
+	userService := UserService{}
+
+	for _, d := range data {
+		t.Run(d.testname, func(t *testing.T) {
+			userApplicationService.userRepository = &UserRepositorierStub{findByUserId: d.findByUserId, update: d.update}
+			userService.userRepository = &UserRepositorierStub{findByUserId: d.findByUserId, findByUserName: d.findByUserName}
+			userApplicationService.userService = userService
+
+			err := userApplicationService.Update(*d.userUpdateCommand)
+			var errMsg string
+			if err != nil {
+				errMsg = err.Error()
+			}
+			if errMsg != d.errMsg {
+				t.Errorf("Expected error `%s`, got `%s`", d.errMsg, errMsg)
+			}
+		})
+	}
+}

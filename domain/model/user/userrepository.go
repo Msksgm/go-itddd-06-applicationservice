@@ -11,6 +11,7 @@ type UserRepositorier interface {
 	FindByUserName(name *UserName) (*User, error)
 	FindByUserId(userId *UserId) (*User, error)
 	Save(user *User) error
+	Update(user *User) error
 }
 
 type UserRepository struct {
@@ -146,4 +147,8 @@ type FindByUserIdQueryError struct {
 
 func (err *FindByUserIdQueryError) Error() string {
 	return err.Message
+}
+
+func (ur *UserRepository) Update(user *User) (err error) {
+	return fmt.Errorf("not implemented")
 }

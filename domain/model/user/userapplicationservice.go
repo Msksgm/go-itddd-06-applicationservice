@@ -100,3 +100,44 @@ type GetError struct {
 func (err *GetError) Error() string {
 	return err.Message
 }
+
+type UserUpdateCommand struct {
+	Id   string
+	Name string
+}
+
+func (uas *UserApplicationService) Update(command UserUpdateCommand) error {
+	targetId, err := NewUserId(command.Id)
+	if err != nil {
+		return err
+	}
+	user, err := uas.userRepository.FindByUserId(targetId)
+	if err != nil {
+		return err
+	}
+	if user == nil {
+		return fmt.Errorf("user is not found")
+	}
+
+	if name := command.Name; name != "" {
+		newUserName, err := NewUserName(name)
+		if err != nil {
+			return err
+		}
+		user.ChangeName(*newUserName)
+
+		isExists, err := uas.userService.Exists(user)
+		if err != nil {
+			return err
+		}
+		if isExists {
+			return fmt.Errorf("user name of %s is already exists.", name)
+		}
+	}
+
+	if err := uas.userRepository.Update(user); err != nil {
+		return err
+	}
+
+	return nil
+}
