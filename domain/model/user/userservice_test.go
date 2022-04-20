@@ -6,11 +6,16 @@ import (
 
 type UserRepositorierStub struct {
 	findByUserName func(name UserName) (*User, error)
+	findByUserId   func(userId UserId) (*User, error)
 	save           func(user User) error
 }
 
 func (urs *UserRepositorierStub) FindByUserName(name *UserName) (*User, error) {
 	return urs.findByUserName(*name)
+}
+
+func (urs *UserRepositorierStub) FindByUserId(userId *UserId) (*User, error) {
+	return urs.findByUserId(*userId)
 }
 
 func (urs *UserRepositorierStub) Save(user *User) error {

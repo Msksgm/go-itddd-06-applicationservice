@@ -9,6 +9,7 @@ import (
 
 type UserRepositorier interface {
 	FindByUserName(name *UserName) (*User, error)
+	FindByUserId(userId *UserId) (*User, error)
 	Save(user *User) error
 }
 
@@ -97,4 +98,8 @@ type SaveQueryRowError struct {
 
 func (err *SaveQueryRowError) Error() string {
 	return err.Message
+}
+
+func (ur *UserRepository) FindByUserId(userId *UserId) (user *User, err error) {
+	return nil, fmt.Errorf("not implemented")
 }

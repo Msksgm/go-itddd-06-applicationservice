@@ -63,3 +63,40 @@ type RegisterError struct {
 func (err *RegisterError) Error() string {
 	return err.Message
 }
+
+type UserData struct {
+	Id   string
+	Name string
+}
+
+func (uas *UserApplicationService) Get(userId string) (_ *UserData, err error) {
+	defer func() {
+		if err != nil {
+			err = &GetError{UserId: userId, Message: fmt.Sprintf("userapplicationservice.Get err: %s", err), Err: err}
+		}
+	}()
+	targetId, err := NewUserId(userId)
+	if err != nil {
+		return nil, err
+	}
+	user, err := uas.userRepository.FindByUserId(targetId)
+	if err != nil {
+		return nil, err
+	}
+
+	if user == nil {
+		return nil, nil
+	}
+	userData := &UserData{Id: user.id.value, Name: user.name.value}
+	return userData, nil
+}
+
+type GetError struct {
+	UserId  string
+	Message string
+	Err     error
+}
+
+func (err *GetError) Error() string {
+	return err.Message
+}
