@@ -100,6 +100,50 @@ func (err *SaveQueryRowError) Error() string {
 	return err.Message
 }
 
-func (ur *UserRepository) FindByUserId(userId *UserId) (user *User, err error) {
-	return nil, fmt.Errorf("not implemented")
+func (ur *UserRepository) FindByUserId(id *UserId) (user *User, err error) {
+	tx, err := ur.db.Begin()
+	if err != nil {
+		return
+	}
+	defer func() {
+		switch err {
+		case nil:
+			err = tx.Commit()
+		default:
+			tx.Rollback()
+		}
+	}()
+
+	rows, err := tx.Query("SELECT id, name FROM users WHERE id = $1", id.value)
+	if err != nil {
+		return nil, &FindByUserIdQueryError{UserId: *id, Message: fmt.Sprintf("userrepository.FindByUserId err: %s", err), Err: err}
+	}
+	defer rows.Close()
+
+	userId := &UserId{}
+	userName := &UserName{}
+	for rows.Next() {
+		err := rows.Scan(&userId.value, &userName.value)
+		if err != nil {
+			return nil, err
+		}
+		user = &User{id: *userId, name: *userName}
+	}
+
+	err = rows.Err()
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+type FindByUserIdQueryError struct {
+	UserId  UserId
+	Message string
+	Err     error
+}
+
+func (err *FindByUserIdQueryError) Error() string {
+	return err.Message
 }
