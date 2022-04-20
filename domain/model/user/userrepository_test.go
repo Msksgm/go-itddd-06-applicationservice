@@ -169,3 +169,50 @@ func Test_FindByUserId(t *testing.T) {
 		}
 	})
 }
+
+func Test_Delete(t *testing.T) {
+	userName, _ := NewUserName("updateUserName")
+	userId, _ := NewUserId("userId")
+
+	user, _ := NewUser(*userId, *userName)
+
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%v' was not expected when opening a stub database connection", err)
+	}
+	defer db.Close()
+	userRepository, err := NewUserRepository(db)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Run("success", func(t *testing.T) {
+		mock.ExpectBegin()
+		mock.ExpectExec("UPDATE users").
+			WillReturnResult(sqlmock.NewResult(1, 1))
+		mock.ExpectCommit()
+
+		got := userRepository.Update(user)
+		if got != nil {
+			t.Errorf("got must be nil, but %v", got)
+		}
+		if err := mock.ExpectationsWereMet(); err != nil {
+			t.Errorf("there were unfulfilled expectations: %s", err)
+		}
+	})
+	t.Run("fail", func(t *testing.T) {
+		var updateQueryRowError *UpdateQueryError
+		mock.ExpectBegin()
+		mock.ExpectExec("UPDATE users").
+			WillReturnError(updateQueryRowError)
+		mock.ExpectRollback()
+
+		got := userRepository.Update(user)
+		if !errors.As(got, &updateQueryRowError) {
+			t.Errorf("err type: %v, expect err type: %v", reflect.TypeOf(err), reflect.TypeOf(updateQueryRowError))
+		}
+		if err := mock.ExpectationsWereMet(); err != nil {
+			t.Errorf("there were unfulfilled expectations: %s", err)
+		}
+	})
+}

@@ -149,6 +149,33 @@ func (err *FindByUserIdQueryError) Error() string {
 	return err.Message
 }
 
+type UpdateQueryError struct {
+	User    User
+	Message string
+	Err     error
+}
+
+func (err *UpdateQueryError) Error() string {
+	return err.Message
+}
+
 func (ur *UserRepository) Update(user *User) (err error) {
-	return fmt.Errorf("not implemented")
+	tx, err := ur.db.Begin()
+	if err != nil {
+		return
+	}
+	defer func() {
+		switch err {
+		case nil:
+			err = tx.Commit()
+		default:
+			tx.Rollback()
+		}
+	}()
+
+	_, err = tx.Exec("UPDATE users SET name=$2 WHERE id=$1", user.id.value, user.name.value)
+	if err != nil {
+		return &UpdateQueryError{User: *user, Message: fmt.Sprintf("userrepository.Delete err: %v", err), Err: err}
+	}
+	return nil
 }
