@@ -137,3 +137,41 @@ func Test_Update(t *testing.T) {
 		})
 	}
 }
+
+func Test_ApplicationServiceDelete(t *testing.T) {
+	data := []struct {
+		testname          string
+		userDeleteCommand *UserDeleteCommand
+		findByUserId      func(userId UserId) (*User, error)
+		delete            func(user User) error
+		want              error
+		errMsg            string
+	}{
+		{
+			"success",
+			&UserDeleteCommand{Id: "userId"},
+			func(userId UserId) (*User, error) {
+				return &User{id: UserId{value: "userId"}, name: UserName{value: "userName"}}, nil
+			},
+			func(user User) error { return nil },
+			nil,
+			"",
+		},
+	}
+	userApplicationService := UserApplicationService{}
+
+	for _, d := range data {
+		t.Run(d.testname, func(t *testing.T) {
+			userApplicationService.userRepository = &UserRepositorierStub{findByUserId: d.findByUserId, delete: d.delete}
+
+			err := userApplicationService.Delete(*d.userDeleteCommand)
+			var errMsg string
+			if err != nil {
+				errMsg = err.Error()
+			}
+			if errMsg != d.errMsg {
+				t.Errorf("Expected error `%s`, got `%s`", d.errMsg, errMsg)
+			}
+		})
+	}
+}
