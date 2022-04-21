@@ -3,8 +3,7 @@ package user
 import (
 	"fmt"
 	"log"
-
-	"github.com/google/uuid"
+	// "github.com/google/uuid"
 )
 
 type UserApplicationService struct {
@@ -27,7 +26,8 @@ func (uas *UserApplicationService) Register(name string) (err error) {
 		return err
 	}
 
-	uuidV4 := uuid.New().String()
+	// uuidV4 := uuid.New().String()
+	uuidV4 := "test-id"
 	userId, err := NewUserId(uuidV4)
 	if err != nil {
 		return err
