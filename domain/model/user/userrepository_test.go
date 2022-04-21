@@ -235,7 +235,7 @@ func Test_DeleteRepository(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		mock.ExpectBegin()
-		mock.ExpectExec("DELETE users").
+		mock.ExpectExec("DELETE FROM users").
 			WillReturnResult(sqlmock.NewResult(1, 1))
 		mock.ExpectCommit()
 
@@ -250,7 +250,7 @@ func Test_DeleteRepository(t *testing.T) {
 	t.Run("fail", func(t *testing.T) {
 		var deleteQueryRowError *DeleteQueryError
 		mock.ExpectBegin()
-		mock.ExpectExec("DELETE users").
+		mock.ExpectExec("DELETE FROM users").
 			WillReturnError(deleteQueryRowError)
 		mock.ExpectRollback()
 

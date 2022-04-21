@@ -205,7 +205,7 @@ func (ur *UserRepository) Delete(user *User) (err error) {
 		}
 	}()
 
-	_, err = tx.Exec("DELETE users WHERE id=$1", user.id.value)
+	_, err = tx.Exec("DELETE FROM users WHERE id=$1", user.id.value)
 	if err != nil {
 		return &DeleteQueryError{User: *user, Message: fmt.Sprintf("userrepository.Delete err: %v", err), Err: err}
 	}
