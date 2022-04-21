@@ -139,6 +139,7 @@ func (uas *UserApplicationService) Update(command UserUpdateCommand) error {
 		return err
 	}
 
+	log.Println("successfully updated")
 	return nil
 }
 
@@ -162,5 +163,6 @@ func (uas *UserApplicationService) Delete(command UserDeleteCommand) error {
 	if err := uas.userRepository.Delete(user); err != nil {
 		return err
 	}
+	log.Println("successfully deleted")
 	return nil
 }
