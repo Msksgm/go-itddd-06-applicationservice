@@ -9,6 +9,7 @@ type UserRepositorierStub struct {
 	findByUserId   func(userId UserId) (*User, error)
 	save           func(user User) error
 	update         func(user User) error
+	delete         func(user User) error
 }
 
 func (urs *UserRepositorierStub) FindByUserName(name *UserName) (*User, error) {
@@ -25,6 +26,10 @@ func (urs *UserRepositorierStub) Save(user *User) error {
 
 func (urs *UserRepositorierStub) Update(user *User) error {
 	return urs.update(*user)
+}
+
+func (urs *UserRepositorierStub) Delete(user *User) error {
+	return urs.delete(*user)
 }
 
 func Test_Exists(t *testing.T) {

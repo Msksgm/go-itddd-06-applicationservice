@@ -12,6 +12,7 @@ type UserRepositorier interface {
 	FindByUserId(userId *UserId) (*User, error)
 	Save(user *User) error
 	Update(user *User) error
+	Delete(user *User) error
 }
 
 type UserRepository struct {
@@ -176,6 +177,37 @@ func (ur *UserRepository) Update(user *User) (err error) {
 	_, err = tx.Exec("UPDATE users SET name=$2 WHERE id=$1", user.id.value, user.name.value)
 	if err != nil {
 		return &UpdateQueryError{User: *user, Message: fmt.Sprintf("userrepository.Delete err: %v", err), Err: err}
+	}
+	return nil
+}
+
+type DeleteQueryError struct {
+	User    User
+	Message string
+	Err     error
+}
+
+func (err *DeleteQueryError) Error() string {
+	return err.Message
+}
+
+func (ur *UserRepository) Delete(user *User) (err error) {
+	tx, err := ur.db.Begin()
+	if err != nil {
+		return
+	}
+	defer func() {
+		switch err {
+		case nil:
+			err = tx.Commit()
+		default:
+			tx.Rollback()
+		}
+	}()
+
+	_, err = tx.Exec("DELETE users WHERE id=$1", user.id.value)
+	if err != nil {
+		return &DeleteQueryError{User: *user, Message: fmt.Sprintf("userrepository.Delete err: %v", err), Err: err}
 	}
 	return nil
 }

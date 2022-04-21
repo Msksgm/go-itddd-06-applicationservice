@@ -141,3 +141,26 @@ func (uas *UserApplicationService) Update(command UserUpdateCommand) error {
 
 	return nil
 }
+
+type UserDeleteCommand struct {
+	Id string
+}
+
+func (uas *UserApplicationService) Delete(command UserDeleteCommand) error {
+	targetId, err := NewUserId(command.Id)
+	if err != nil {
+		return err
+	}
+	user, err := uas.userRepository.FindByUserId(targetId)
+	if err != nil {
+		return err
+	}
+	if user == nil {
+		return nil
+	}
+
+	if err := uas.userRepository.Delete(user); err != nil {
+		return err
+	}
+	return nil
+}
